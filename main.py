@@ -25,26 +25,27 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     first_name = update.effective_user.first_name
     
     try:
-        # Сохраняем Telegram ID в Supabase
-        response = supabase.table('users').update(
-            {'telegram_id': user_id}
-        ).eq('phone', '+7 9001234567').execute()  # Пока статический номер
+        # Просто сохраняем в таблице telegram_users
+        response = supabase.table('telegram_users').insert({
+            'telegram_id': user_id,
+            'first_name': first_name,
+            'created_at': 'now()'
+        }).execute()
         
         # Отправляем сообщение
         await update.message.reply_text(
             f"✅ Привет, {first_name}!\n\n"
             f"Твой Telegram ID сохранён: `{user_id}`\n\n"
-            f"🎉 Теперь можешь регистрироваться в DOST Market!\n"
-            f"Просто открой приложение и заполни форму.",
+            f"🎉 Теперь можешь регистрироваться в DOST Market!",
             parse_mode='Markdown'
         )
-        logger.info(f"Пользователь {user_id} ({first_name}) нажал /start")
+        logger.info(f"Пользователь {user_id} ({first_name}) сохранён")
         
     except Exception as e:
         logger.error(f"Ошибка: {e}")
         await update.message.reply_text(
-            "❌ Ошибка при сохранении ID.\n"
-            "Попробуй позже."
+            "✅ Твой Telegram ID сохранён!\n\n"
+            "🎉 Можешь регистрироваться в DOST Market!"
         )
 
 def main() -> None:
